@@ -1,0 +1,50 @@
+version: '2.2'
+
+networks:
+    default:
+        external:
+            name: "${COMPOSE_PROJECT_NAME}-network"
+
+volumes:
+    docroot:
+        external:
+            name: "${COMPOSE_PROJECT_NAME}-docroot"
+
+services:
+    nginx:
+        container_name: "${COMPOSE_PROJECT_NAME}_nginx"
+        restart: always
+        build: ./nginx
+        cpus: 0.1
+        mem_limit: 128M
+        environment:
+            - VIRTUAL_HOST=${VIRTUAL_HOST}
+            - VIRTUAL_NETWORK=${COMPOSE_PROJECT_NAME}-network
+            - LETSENCRYPT_HOST=${VIRTUAL_HOST}
+            - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+            - docroot:/var/www:ro
+        logging:
+            driver: "json-file"
+            options: { max-size: "10m", max-file: "3" }
+        networks:
+            default:
+                aliases:
+                    - "nginx.${COMPOSE_PROJECT_NAME}"
+
+    ftp:
+        container_name: "${COMPOSE_PROJECT_NAME}_ftp"
+        image: atmoz/sftp:alpine
+        volumes:
+            - docroot:/home/${FTP_USER}:rw
+        ports:
+            - ${FTP_PORT}:22
+        command: www-data:${FTP_PASSWORD}:1000:1000:web
+        logging:
+            driver: "json-file"
+            options: { max-size: "10m", max-file: "3" }
+        networks:
+            default:
+                aliases:
+                    - "ftp.${COMPOSE_PROJECT_NAME}"
