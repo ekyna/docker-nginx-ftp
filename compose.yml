@@ -15,6 +15,7 @@ services:
         container_name: "${COMPOSE_PROJECT_NAME}_nginx"
         restart: always
         build: ./nginx
+        image: "${COMPOSE_PROJECT_NAME}_nginx"
         cpus: 0.1
         mem_limit: 128M
         environment:
@@ -37,7 +38,7 @@ services:
         container_name: "${COMPOSE_PROJECT_NAME}_ftp"
         image: atmoz/sftp:alpine
         volumes:
-            - docroot:/home/${FTP_USER}:rw
+            - docroot:/home/www-data:rw
         ports:
             - ${FTP_PORT}:22
         command: www-data:${FTP_PASSWORD}:1000:1000:web
