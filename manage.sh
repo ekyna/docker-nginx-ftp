@@ -186,12 +186,11 @@ ComposeDown() {
 # ----------------------------- INTERNAL -----------------------------
 
 DoCreateNetworkAndVolumes() {
-    NetworkCreate "${COMPOSE_PROJECT_NAME}-network"
+    NetworkCreate "${COMPOSE_NETWORK}"
     VolumeCreate "${COMPOSE_PROJECT_NAME}-docroot"
 }
 
 DoRemoveNetworkAndVolumes() {
-    #NetworkRemove "${COMPOSE_PROJECT_NAME}-network"
     VolumeRemove "${COMPOSE_PROJECT_NAME}-docroot"
 }
 
