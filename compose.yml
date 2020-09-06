@@ -3,19 +3,23 @@ version: '2.2'
 networks:
     default:
         external:
-            name: "${COMPOSE_PROJECT_NAME}-network"
+            name: ${COMPOSE_PROJECT_NAME}-network
 
 volumes:
     docroot:
         external:
-            name: "${COMPOSE_PROJECT_NAME}-docroot"
+            name: ${COMPOSE_PROJECT_NAME}-docroot
 
 services:
     nginx:
-        container_name: "${COMPOSE_PROJECT_NAME}_nginx"
+        container_name: ${COMPOSE_PROJECT_NAME}_nginx
         restart: always
-        build: ./nginx
-        image: "${COMPOSE_PROJECT_NAME}_nginx"
+        build:
+            context: ./nginx
+            args:
+                gid: ${GROUP_ID}
+                uid: ${USER_ID}
+        image: ${COMPOSE_PROJECT_NAME}_nginx
         cpus: 0.1
         mem_limit: 128M
         environment:
@@ -32,20 +36,20 @@ services:
         networks:
             default:
                 aliases:
-                    - "nginx.${COMPOSE_PROJECT_NAME}"
+                    - nginx.${COMPOSE_PROJECT_NAME}
 
     ftp:
-        container_name: "${COMPOSE_PROJECT_NAME}_ftp"
+        container_name: ${COMPOSE_PROJECT_NAME}_ftp
         image: atmoz/sftp:alpine
         volumes:
             - docroot:/home/www-data:rw
         ports:
             - ${FTP_PORT}:22
-        command: www-data:${FTP_PASSWORD}:1000:1000:web
+        command: www-data:${FTP_PASSWORD}:${USER_ID}:${GROUP_ID}:web
         logging:
             driver: "json-file"
             options: { max-size: "10m", max-file: "3" }
         networks:
             default:
                 aliases:
-                    - "ftp.${COMPOSE_PROJECT_NAME}"
+                    - ftp.${COMPOSE_PROJECT_NAME}
